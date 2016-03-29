@@ -21,7 +21,9 @@ function logInFile(filename, text) {
     });
 }
 
-//Eagle or Tails Game
+
+console.log("BlackJack game. You got 0 points now\n");
+//BlackJack Game
 rl.setPrompt('Print "more" (or just press Enter), "done" or "exit" > ');
 rl.prompt();
 var score = 0, userScore = 0, maxScore = 21, gameResult;
@@ -37,7 +39,7 @@ rl.on('line', (line) => {
         default:
         score = getNaturalRandom(1,10);
         userScore += score;
-        gameResult = `Added "${score}", you have "${userScore}" now\n`;
+        gameResult = `Added "${score}", you have "${userScore}" points now\n`;
         if(userScore == 21) {
             gameResult = gameResult + "YOU WON!!!";
             activeGame = false;
