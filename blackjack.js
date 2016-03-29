@@ -22,27 +22,36 @@ function logInFile(filename, text) {
 }
 
 //Eagle or Tails Game
-rl.setPrompt('Eagle (1) or Tails (2) (or exit)? > ');
+rl.setPrompt('Print "more" (or just press Enter), "done" or "exit" > ');
 rl.prompt();
-var randResult, gameResult;
+var score = 0, userScore = 0, maxScore = 21, gameResult;
+var activeGame = true;
 rl.on('line', (line) => {
-    randResult = getNaturalRandom(1, 2).toString();
     switch(line) {
-        case randResult:
-            gameResult = `"${randResult}" == "${line}" Yep!!\n`;
-            break;
+        case "done":
         case "exit":
-            gameResult = `Bye!!\n`;
+            gameResult = `You result is "${userScore}"!\n`;
+            activeGame = false;
             break;
+        case "more":
         default:
-            gameResult = `"${randResult}" == "${line}" No =(\n`;
-            break;
+        score = getNaturalRandom(1,10);
+        userScore += score;
+        gameResult = `Added "${score}", you have "${userScore}" now\n`;
+        if(userScore == 21) {
+            gameResult = gameResult + "YOU WON!!!";
+            activeGame = false;
+        }
+        else if(userScore > 21) {
+            gameResult = gameResult + "you lose =(";
+            activeGame = false;
+        }
+        break;
     }
-
     console.log(gameResult);
     logInFile(argv.log, gameResult); //тут пишет в файл только не при выходе
 
-    if(line == "exit") {
+    if(!activeGame) {
         process.exit(0);
     }
 
