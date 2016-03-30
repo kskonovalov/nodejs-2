@@ -9,24 +9,24 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
+if(argv.log === undefined) {
+    argv.log = "log.txt";
+}
+
 function getNaturalRandom(min, max) {
     return Math.round(Math.random() * (max - min) + min);
 }
 
 function logInFile(filename, text) {
-    fs.appendFile(filename, text, function(err) {
-        if(err) {
-            return console.log(err);
-        }
-    });
+    fs.appendFileSync(filename, text);
 }
 
 function whoWon(userScore, robotScore) {
     if(userScore > robotScore)
-        gameResult = "You won!\n";
+        gameResult = "win\n";
     else if(userScore < robotScore)
-        gameResult = "Robot won!\n";
-    else gameResult = "Draw!\n";
+        gameResult = "lose\n";
+    else gameResult = "draw\n";
     return gameResult;
 }
 
@@ -35,7 +35,7 @@ console.log("BlackJack game. You and Robot have 0 points now\n");
 rl.setPrompt('Print "more" (or just press Enter), "done" or "exit" > ');
 rl.prompt();
 var maxScore = 21;
-var score = 0, userScore = 0, robotScore = 0, gameResult;
+var score = 0, userScore = 0, robotScore = 0, gameResult, logText;
 var activeGame = true;
 rl.on('line', (line) => {
     switch(line) {
@@ -43,6 +43,7 @@ rl.on('line', (line) => {
         case "exit":
             gameResult = `You result is "${userScore}", robot result is "${robotScore}"!\n`;
             gameResult = gameResult + whoWon(userScore, robotScore);
+            logText = whoWon(userScore, robotScore);
             activeGame = false;
             break;
         case "more":
@@ -55,30 +56,35 @@ rl.on('line', (line) => {
         gameResult += `ROBOT: Added "${score}", robot have "${robotScore}" points now\n`;
         if(userScore > maxScore && robotScore > maxScore) {
             gameResult += "DRAW!";
+            logText = "draw\n";
             activeGame = false;
         }
         else if(userScore > maxScore) {
             gameResult += "You lose..";
+            logText = "lose\n";
             activeGame = false;
         }
         else if(robotScore > maxScore) {
             gameResult += "Robot lose!";
+            logText = "win\n";
             activeGame = false;
         }
         else if(userScore == maxScore) {
             gameResult += "You won!!!";
+            logText = "win\n";
             activeGame = false;
         }
         else if(robotScore == maxScore) {
             gameResult += "Robot won)";
+            logText = "lose\n";
             activeGame = false;
         }
         break;
     }
     console.log(gameResult);
-    logInFile(argv.log, gameResult); //тут пишет в файл только не при выходе
 
     if(!activeGame) {
+        logInFile(argv.log,logText);
         process.exit(0);
     }
 
@@ -86,12 +92,11 @@ rl.on('line', (line) => {
 
 }).on('close', () => {
     gameResult = `You killed me!\n`;
-    console.log(gameResult);  //и тут пишет в файл только не при выходе
+    console.log(gameResult);
     process.exit(0);
 });
 
 process.on('exit', (data) => {
     gameResult = "exited!!";
     console.log(gameResult);
-    logInFile(argv.log, gameResult); //и тут пишет в файл только не при выходе
 });
