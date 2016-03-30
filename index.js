@@ -4,6 +4,10 @@ const readline = require('readline'); //for input
 const fs = require('fs'); //for file work
 const argv = require('minimist')(process.argv.slice(2)); //for options
 
+if(argv.log === undefined) {
+    argv.log = "log.txt";
+}
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -14,11 +18,7 @@ function getNaturalRandom(min, max) {
 }
 
 function logInFile(filename, text) {
-    fs.appendFile(filename, text, function(err) {
-        if(err) {
-            return console.log(err);
-        }
-    });
+    fs.appendFileSync(filename, text);
 }
 
 //Eagle or Tails Game
@@ -30,17 +30,18 @@ rl.on('line', (line) => {
     switch(line) {
         case randResult:
             gameResult = `"${randResult}" == "${line}" Yep!!\n`;
+            logInFile(argv.log, "win\n");
             break;
         case "exit":
             gameResult = `Bye!!\n`;
             break;
         default:
             gameResult = `"${randResult}" == "${line}" No =(\n`;
+            logInFile(argv.log, "lose\n");
             break;
     }
 
     console.log(gameResult);
-    logInFile(argv.log, gameResult); //тут пишет в файл только не при выходе
 
     if(line == "exit") {
         process.exit(0);
@@ -50,12 +51,10 @@ rl.on('line', (line) => {
 
 }).on('close', () => {
     gameResult = `You killed me!\n`;
-    console.log(gameResult);  //и тут пишет в файл только не при выходе
     process.exit(0);
 });
 
 process.on('exit', (data) => {
     gameResult = "exited!!";
     console.log(gameResult);
-    logInFile(argv.log, gameResult); //и тут пишет в файл только не при выходе
 });
